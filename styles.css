@@ -1,8 +1,8 @@
 :root {
-  --bg-color: #FAF6F0; /* Soft parchment */
-  --text-main: #3E2A21; /* Deep walnut */
+  --bg-color: #FAF6F0;
+  --text-main: #3E2A21;
   --text-muted: #7A6355;
-  --accent: #D4A373; /* Warm amber/carved wood */
+  --accent: #D4A373;
   --card-bg: #FFFFFF;
   --shadow-soft: 0 12px 34px rgba(62, 42, 33, 0.06);
   --border-subtle: 1px solid rgba(212, 163, 115, 0.25);
@@ -18,7 +18,7 @@ body {
   background-color: var(--bg-color);
   color: var(--text-main);
   font-family: 'Outfit', sans-serif;
-  line-height: 1.6;
+  line-height: 1.5;
   overflow-x: hidden;
   -webkit-font-smoothing: antialiased;
 }
@@ -36,19 +36,19 @@ h1, h2, h3 {
 }
 
 h1 {
-  font-size: clamp(2.2rem, 6vw, 3rem);
-  margin-bottom: 1.5rem;
+  font-size: clamp(2rem, 6vw, 2.6rem);
+  margin-bottom: 0.8rem;
 }
 
 h2 {
-  font-size: clamp(1.8rem, 5vw, 2.4rem);
-  margin-bottom: 1.5rem;
+  font-size: clamp(1.6rem, 5vw, 2.2rem);
+  margin-bottom: 0.8rem;
 }
 
 .subtitle {
-  font-size: 1.1rem;
+  font-size: clamp(1rem, 3vw, 1.1rem);
   color: var(--text-muted);
-  margin-bottom: 2.5rem;
+  margin-bottom: 1.5rem;
 }
 
 .accent-text {
@@ -57,13 +57,13 @@ h2 {
   letter-spacing: 2px;
   text-transform: uppercase;
   font-weight: 600;
-  margin-bottom: 12px;
+  margin-bottom: 8px;
   display: block;
 }
 
 .section {
-  padding: 5rem 0;
-  min-height: 80vh;
+  /* Removed 100svh and reduced padding heavily */
+  padding: 3rem 0;
   display: flex;
   flex-direction: column;
   justify-content: center;
@@ -72,7 +72,7 @@ h2 {
 /* --- Interactive Elements --- */
 .btn-outline {
   display: inline-block;
-  padding: 12px 28px;
+  padding: 10px 24px;
   border: 2px solid var(--accent);
   color: var(--accent);
   background: transparent;
@@ -90,21 +90,21 @@ h2 {
 }
 
 .btn-outline.small {
-  padding: 8px 16px;
+  padding: 6px 14px;
   font-size: 0.85rem;
 }
 
 /* --- Player Card Redesign --- */
 .player-card {
   background: var(--card-bg);
-  border-radius: 24px;
-  padding: 2.5rem 2rem;
+  border-radius: 20px;
+  padding: 1.8rem 1.5rem;
   box-shadow: var(--shadow-soft);
   border: var(--border-subtle);
   text-align: center;
   position: relative;
   transition: transform 0.3s ease, box-shadow 0.3s ease;
-  margin-top: 1rem;
+  margin-top: 0.5rem;
 }
 
 body.is-playing .player-card {
@@ -116,8 +116,8 @@ body.is-playing .player-card {
   display: flex;
   justify-content: center;
   align-items: center;
-  gap: 10px;
-  margin-bottom: 15px;
+  gap: 8px;
+  margin-bottom: 10px;
 }
 
 .player-header .accent-text {
@@ -140,10 +140,10 @@ body.is-playing .status-dot {
 }
 
 .caption {
-  font-size: 0.95rem;
+  font-size: 0.9rem;
   color: var(--text-muted);
-  margin-top: 8px;
-  margin-bottom: 2rem;
+  margin-top: 4px;
+  margin-bottom: 1.5rem;
 }
 
 /* --- The Wooden Waveform --- */
@@ -152,14 +152,14 @@ body.is-playing .status-dot {
   align-items: center;
   justify-content: center;
   gap: 4px;
-  height: 60px;
-  margin-bottom: 2.5rem;
+  height: clamp(30px, 6vh, 45px); /* Tightened height */
+  margin-bottom: 1.5rem;
 }
 
 .wooden-wave span {
   display: block;
   width: 6px;
-  height: 10px; /* Default resting height */
+  height: 10px;
   background: linear-gradient(180deg, #D4A373, #A67C52);
   border-radius: 4px;
   opacity: 0.5;
@@ -169,10 +169,6 @@ body.is-playing .status-dot {
 body.is-playing .wooden-wave span {
   opacity: 0.9;
   animation: carveWave 1.2s ease-in-out infinite alternate;
-}
-
-/* We will use CSS variables set by JS to offset the animation delays */
-body.is-playing .wooden-wave span {
   animation-delay: var(--delay);
 }
 
@@ -185,7 +181,7 @@ body.is-playing .wooden-wave span {
 .player-controls {
   display: flex;
   align-items: center;
-  gap: 1.5rem;
+  gap: 1.2rem;
 }
 
 .play-btn {
@@ -193,8 +189,8 @@ body.is-playing .wooden-wave span {
   background: var(--accent);
   color: white;
   border: none;
-  width: 60px;
-  height: 60px;
+  width: clamp(50px, 10vw, 55px); 
+  height: clamp(50px, 10vw, 55px);
   border-radius: 50%;
   cursor: pointer;
   box-shadow: 0 8px 16px rgba(212, 163, 115, 0.25);
@@ -205,8 +201,8 @@ body.is-playing .wooden-wave span {
 }
 
 .play-btn svg {
-  width: 28px;
-  height: 28px;
+  width: 24px;
+  height: 24px;
 }
 
 .play-btn:active {
@@ -228,7 +224,7 @@ body.is-playing .wooden-wave span {
   appearance: none;
   -webkit-appearance: none;
   cursor: pointer;
-  margin-bottom: 8px;
+  margin-bottom: 6px;
 }
 
 .seek-bar::-webkit-slider-thumb {
@@ -256,21 +252,21 @@ body.is-playing .wooden-wave span {
   display: flex;
   justify-content: space-between;
   align-items: flex-end;
-  margin-bottom: 2rem;
+  margin-bottom: 1.2rem;
   border-bottom: 1px solid rgba(62, 42, 33, 0.1);
-  padding-bottom: 1rem;
+  padding-bottom: 0.8rem;
 }
 
 .lyrics-box {
   background: var(--card-bg);
-  padding: 2rem;
+  padding: 1.5rem;
   border-radius: 16px;
   box-shadow: var(--shadow-soft);
   border-left: 4px solid var(--accent);
 }
 
 .lyric-line {
-  margin-bottom: 1.5rem;
+  margin-bottom: 1.2rem;
 }
 
 .lyric-line:last-child {
@@ -278,16 +274,16 @@ body.is-playing .wooden-wave span {
 }
 
 .original {
-  font-size: 1.15rem;
+  font-size: 1.1rem;
   font-weight: 500;
 }
 
 .translated {
-  font-size: 0.95rem;
+  font-size: 0.9rem;
   color: var(--text-muted);
   font-style: italic;
   display: none;
-  margin-top: 4px;
+  margin-top: 2px;
 }
 
 .lyrics-box.show-translation .translated {
@@ -297,8 +293,8 @@ body.is-playing .wooden-wave span {
 
 /* --- Story & Tribute Section --- */
 .story-text p {
-  font-size: 1.15rem;
-  margin-bottom: 1.2rem;
+  font-size: 1.1rem;
+  margin-bottom: 1rem;
   font-family: 'Lora', serif;
 }
 
@@ -306,29 +302,29 @@ body.is-playing .wooden-wave span {
   font-family: 'Outfit', sans-serif;
   font-weight: 600;
   color: var(--accent);
-  margin-top: 2rem;
+  margin-top: 1.5rem;
 }
 
 .photo-frame {
   background: white;
-  padding: 12px 12px 36px 12px;
+  padding: 10px 10px 30px 10px;
   border-radius: 4px;
   box-shadow: 0 15px 35px rgba(62, 42, 33, 0.15);
   transform: rotate(-2deg);
-  margin: 3rem auto;
-  max-width: 320px;
+  margin: 2rem auto;
+  max-width: 300px;
 }
 
 .photo-frame img {
   width: 100%;
   height: auto;
   border-radius: 2px;
-  filter: sepia(0.2) contrast(1.05); /* Slight vintage warmth */
+  filter: sepia(0.2) contrast(1.05);
 }
 
 .photo-frame figcaption {
   text-align: center;
-  margin-top: 16px;
+  margin-top: 12px;
   font-family: 'Lora', serif;
   font-style: italic;
   color: var(--text-muted);
@@ -336,14 +332,14 @@ body.is-playing .wooden-wave span {
 
 .instagram-link {
   text-align: center;
-  margin-top: 3rem;
+  margin-top: 2rem;
 }
 
 /* --- System Animations --- */
 .reveal {
   opacity: 0;
-  transform: translateY(30px);
-  transition: opacity 0.8s ease-out, transform 0.8s ease-out;
+  transform: translateY(20px);
+  transition: opacity 0.6s ease-out, transform 0.6s ease-out;
 }
 
 .reveal.in-view {

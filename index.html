@@ -5,7 +5,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <meta name="theme-color" content="#FAF6F0">
   <title>Happy Birthday, Sannidhi</title>
-  <meta name="description" content="I managed to trap your voice inside a piece of wood.">
+  <meta name="description" content="I managed to hide your voice inside a piece of wood.">
   
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -18,20 +18,19 @@
   <main class="page-shell">
     
     <section class="section hero reveal">
-      <span class="accent-text">Hidden in the grain</span>
-      <h1>I managed to trap your voice inside a piece of wood.</h1>
-      <p class="subtitle">Not forever, though. Tap below and listen to the echo it left behind.</p>
+      <span class="accent-text" id="heroAccent"></span>
+      <h1 id="heroTitle"></h1>
+      <p class="subtitle" id="heroSubtitle"></p>
       
       <article class="player-card">
         <div class="player-header">
           <span class="accent-text">Now Playing</span>
           <div class="status-dot" id="statusDot"></div>
         </div>
-        <h2>One Song. One Moment.</h2>
-        <p class="caption">Captured from one of Sannidhi's Instagram reels.</p>
+        <h2 id="playerTitle"></h2>
+        <p class="caption" id="playerCaption"></p>
         
-        <div class="wooden-wave" id="waveform">
-          </div>
+        <div class="wooden-wave" id="waveform"></div>
 
         <div class="player-controls">
           <button class="play-btn" id="playToggle" aria-label="Play song">
@@ -51,75 +50,44 @@
     </section>
 
     <section class="section art-section reveal">
-      <span class="accent-text">Voice as object</span>
-      <h2>The Shape of a Song</h2>
-      <div class="story-text">
-        <p>Most songs exist for only a few minutes.</p>
-        <p>This one became a pattern.</p>
-        <p>A vibration.</p>
-        <p>A line carved into wood.</p>
-        <p>A small reminder that beautiful things do not always have to disappear.</p>
-      </div>
+      <span class="accent-text" id="storyAccent"></span>
+      <h2 id="storyTitle"></h2>
+      <div class="story-text" id="storyContainer"></div>
     </section>
 
     <section class="section lyrics-section reveal">
       <div class="lyrics-header">
         <div>
-          <span class="accent-text">Words, held gently</span>
-          <h2>Lyrics</h2>
+          <span class="accent-text" id="lyricsAccent"></span>
+          <h2 id="lyricsTitle"></h2>
         </div>
         <button id="translateToggle" class="btn-outline small">Translation</button>
       </div>
       
-      <div class="lyrics-box" id="lyricsContainer">
-        <div class="lyric-line">
-          <p class="original">Tere aane ke baad samjhe hain mohabbat kya hai</p>
-          <p class="translated">Since you arrived, I have truly learned what love means</p>
-        </div>
-        <div class="lyric-line">
-          <p class="original">Ab hamein chaand ki, taaron ki zaroorat kya hai</p>
-          <p class="translated">Now, what need do I have for the moon and stars?</p>
-        </div>
-        <div class="lyric-line">
-          <p class="original">Pyaar se badhke bhala kaun sa gehna hoga</p>
-          <p class="translated">What ornament could ever outshine true love?</p>
-        </div>
-        <div class="lyric-line">
-          <p class="original">Ab hamein aap ke kadmon mein rehna hoga</p>
-          <p class="translated">Now, I wish only to walk beside your path</p>
-        </div>
-        <div class="lyric-line">
-          <p class="original">Sharm aati hai magar aaj yeh kehna hoga</p>
-          <p class="translated">I feel shy, but today I must find the voice to say this...</p>
-        </div>
-      </div>
+      <div class="lyrics-box" id="lyricsContainer"></div>
     </section>
 
     <section class="section tribute-section reveal">
-      <span class="accent-text">A conspiracy of friends</span>
-      <h2>Happy Birthday, Sannidhi</h2>
+      <span class="accent-text" id="tributeAccent"></span>
+      <h2 id="tributeTitle"></h2>
       
       <figure class="photo-frame">
-        <img src="photo.png" alt="Sannidhi">
-        <figcaption>For the singer in the room.</figcaption>
+        <img id="tributePhoto" src="" alt="Sannidhi">
+        <figcaption id="tributeCaption"></figcaption>
       </figure>
 
-      <div class="story-text">
-        <p>Some people collect photos. Some collect memories. You seem to collect songs.</p>
-        <p>From random conversations, late replies, shared jokes, and countless melodies - here's one voice we thought deserved a permanent place.</p>
-        <p>May this year bring new adventures and many more reasons to keep singing.</p>
-        <p class="signature">- Eww/Shiii</p>
-      </div>
+      <div class="story-text" id="tributeContainer"></div>
 
       <div class="instagram-link">
-        <a href="https://www.instagram.com/_sannidhiii_/" target="_blank" rel="noopener" class="btn-outline">Visit her Instagram</a>
+        <a id="instagramLink" href="#" target="_blank" rel="noopener" class="btn-outline">Visit her Instagram</a>
       </div>
     </section>
 
   </main>
 
-  <audio id="song" src="song.mp3" preload="metadata"></audio>
+  <audio id="song" src="" preload="metadata"></audio>
 
   <script src="script.js"></script>
+  
 </body>
 </html>
