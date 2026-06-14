@@ -1,0 +1,220 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="theme-color" content="#090910">
+  <title>Happy Birthday, Sannidhi</title>
+
+  <!-- Open Graph Meta Tags for Premium App Share Previews -->
+  <meta property="og:title" content="Happy Birthday, Sannidhi">
+  <meta property="og:description" content="I managed to trap your voice inside a piece of wood.">
+  <meta property="og:image" content="photo.png">
+  <meta property="og:type" content="website">
+
+  <!-- Resource Performance Preloads -->
+  <link rel="dns-prefetch" href="https://www.instagram.com">
+  <link rel="preload" href="song.mp3" as="audio">
+  <link rel="preload" href="photo.png" as="image">
+  <link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>🎵</text></svg>">
+  
+  <link rel="stylesheet" href="styles.css">
+
+  <!-- Progressive Enhancement Guard: Applies interactive layout classes only when JS is alive -->
+  <script>
+    document.documentElement.classList.add('js-active');
+  </script>
+</head>
+<body>
+  <div class="page-shell">
+    <canvas id="particleCanvas" class="particle-canvas" aria-hidden="true"></canvas>
+    <div class="ambient-layer" aria-hidden="true"></div>
+
+    <main>
+      <!-- Hero Section -->
+      <section class="hero" id="hero" aria-labelledby="hero-title">
+        <div class="hero-photo-wrapper">
+          <div class="hero-photo" aria-hidden="true"></div>
+        </div>
+        <div class="hero-wave" aria-hidden="true">
+          <span></span>
+          <span></span>
+          <span></span>
+        </div>
+        <div class="hero-content">
+          <p class="eyebrow">Hidden in the grain</p>
+          <h1 id="hero-title">
+            <span>I managed to trap your voice inside a piece of wood.</span>
+            <span>Not forever, though.</span>
+            <span>Tap below and listen to the echo it left behind.</span>
+          </h1>
+          <button class="hero-play" id="heroPlay" type="button" aria-label="Play Sannidhi's song">
+            <svg class="play-svg-icon" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
+              <path d="M8 5v14l11-7z"/>
+            </svg>
+          </button>
+        </div>
+        <div class="scroll-cue" aria-hidden="true">
+          <span></span>
+        </div>
+      </section>
+
+      <!-- Player Section -->
+      <section class="section player-section locked-content" id="playerSection" aria-labelledby="player-title">
+        <div class="section-inner narrow">
+          <article class="player-card reveal">
+            <div class="player-topline">
+              <p class="eyebrow">Now playing</p>
+              <div class="listening-dot" aria-hidden="true"></div>
+            </div>
+            <h2 id="player-title">One Song. One Moment. One Piece of Wood.</h2>
+            <p class="caption">Captured from one of Sannidhi's Instagram singing reels.</p>
+
+            <!-- Dynamic Waveform: Generated dynamically by script.js -->
+            <div class="waveform" id="playerWaveform" aria-hidden="true"></div>
+
+            <div class="controls">
+              <button class="control-button" id="playToggle" type="button" aria-label="Play song" data-state="paused">
+                <svg class="icon-play" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
+                  <path d="M8 5v14l11-7z"/>
+                </svg>
+                <svg class="icon-pause" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
+                  <path d="M6 19h4V5H6v14zm8-14v14h4V5h-4z"/>
+                </svg>
+              </button>
+              <div class="timeline-wrap">
+                <input id="seekBar" class="seek-bar" type="range" min="0" max="100" value="0" step="0.01" aria-label="Song progress">
+                <div class="time-row">
+                  <span id="currentTime">0:00</span>
+                  <span id="duration">0:00</span>
+                </div>
+              </div>
+            </div>
+          </article>
+        </div>
+      </section>
+
+      <!-- Art Section -->
+      <section class="section art-section locked-content" aria-labelledby="shape-title">
+        <div class="section-inner">
+          <div class="art-grid">
+            <div class="sound-sculpture reveal" aria-hidden="true">
+              <!-- Dynamic Sculpture: Generated dynamically by script.js -->
+              <div class="engraved-wave" id="sculptureWaveform"></div>
+              <div class="wood-grain-overlay"></div>
+            </div>
+            <div class="copy-block reveal">
+              <p class="eyebrow">Voice as object</p>
+              <h2 id="shape-title">The Shape of a Song</h2>
+              <p>Most songs exist for only a few minutes.</p>
+              <p>This one became a pattern.</p>
+              <p>A vibration.</p>
+              <p>A line carved into wood.</p>
+              <p>A small reminder that beautiful things do not always have to disappear.</p>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- Lyrics Section with Dynamic Toggle -->
+      <section class="section lyrics-section locked-content" aria-labelledby="lyrics-title">
+        <div class="section-inner narrow">
+          <article class="glass-panel reveal">
+            <div class="lyrics-header-row">
+              <div>
+                <p class="eyebrow">Words, held gently in place.</p>
+                <h2 id="lyrics-title">Lyrics</h2>
+              </div>
+              <button class="translation-toggle" id="lyricsTranslateToggle" type="button" aria-live="polite">
+                English Translation
+              </button>
+            </div>
+            
+            <div class="lyrics-container" id="lyricsContainer">
+              <div class="lyric-line-pair">
+                <p class="original-lyric">Tere aane ke baad samjhe hain mohabbat kya hai</p>
+                <p class="translated-lyric">Since you arrived, I have truly learned what love means</p>
+              </div>
+              <div class="lyric-line-pair">
+                <p class="original-lyric">Ab hamein chaand ki, taaron ki zaroorat kya hai</p>
+                <p class="translated-lyric">Now, what need do I have for the moon and stars?</p>
+              </div>
+              <div class="lyric-line-pair">
+                <p class="original-lyric">Pyaar se badhke bhala kaun sa gehna hoga</p>
+                <p class="translated-lyric">What ornament could ever outshine true love?</p>
+              </div>
+              <div class="lyric-line-pair">
+                <p class="original-lyric">Ab hamein aap ke kadmon mein rehna hoga</p>
+                <p class="translated-lyric">Now, I wish only to walk beside your path</p>
+              </div>
+              <div class="lyric-line-pair">
+                <p class="original-lyric">Sharm aati hai magar aaj yeh kehna hoga</p>
+                <p class="translated-lyric">I feel shy, but today I must find the voice to say this...</p>
+              </div>
+            </div>
+          </article>
+        </div>
+      </section>
+
+      <!-- Tribute Section -->
+      <section class="section tribute-section locked-content" aria-labelledby="from-us-title">
+        <div class="section-inner">
+          <div class="tribute-layout">
+            <div class="copy-block reveal">
+              <p class="eyebrow">A small conspiracy of friends</p>
+              <h2 id="from-us-title">From Us</h2>
+              <p>From random conversations, late replies, shared jokes, and countless songs - here's one voice we thought deserved a permanent place.</p>
+              <p>So a reel became a wave, the wave became wood, and the wood learned how to open this little hidden room whenever you tap it.</p>
+            </div>
+            <figure class="portrait-card reveal">
+              <div class="portrait-aspect-box">
+                <img src="photo.png" alt="Sannidhi Portrait" width="400" height="400" loading="lazy">
+              </div>
+              <figcaption>For the singer in the room.</figcaption>
+            </figure>
+          </div>
+        </div>
+      </section>
+
+      <!-- Instagram Section (Positioned before Birthday for proper narrative flow) -->
+      <section class="section instagram-section locked-content" aria-labelledby="instagram-title">
+        <div class="section-inner narrow">
+          <div class="instagram-panel reveal">
+            <p class="eyebrow">Instagram</p>
+            <h2 id="instagram-title">Where the Music Lives</h2>
+            <p>More songs, more reels, more reasons to stop scrolling and listen.</p>
+            <a class="instagram-button" href="https://www.instagram.com/_sannidhiii_/" target="_blank" rel="noopener noreferrer">
+              Visit Instagram
+            </a>
+          </div>
+        </div>
+      </section>
+
+      <!-- Birthday Section (The Climax) -->
+      <section class="section birthday-section locked-content" id="birthdaySection" aria-labelledby="birthday-title">
+        <div class="section-inner narrow">
+          <article class="birthday-card reveal" id="birthdayCard">
+            <!-- Dynamic Micro-Sparkles Area -->
+            <div class="climax-sparkle-layer" id="climaxSparkleLayer" aria-hidden="true"></div>
+            
+            <p class="eyebrow">A birthday, wrapped in a song</p>
+            <h2 id="birthday-title">Happy Birthday, Sannidhi</h2>
+            <div class="birthday-copy">
+              <p>Some people collect photos.</p>
+              <p>Some collect memories.</p>
+              <p>You seem to collect songs.</p>
+              <p>Here's one we wanted you to keep.</p>
+              <p>May this year bring new melodies, new adventures, and many more reasons to keep singing.</p>
+            </div>
+            <p class="signature">- Your friends</p>
+          </article>
+        </div>
+      </section>
+    </main>
+
+    <audio id="song" preload="metadata" src="song.mp3"></audio>
+  </div>
+
+  <script src="script.js"></script>
+</body>
+</html>
