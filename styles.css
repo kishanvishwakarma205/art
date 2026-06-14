@@ -95,6 +95,7 @@ body.is-playing .player-card {
     linear-gradient(245deg, rgba(143, 99, 255, 0.13), transparent 42%),
     radial-gradient(circle at 70% 78%, rgba(255, 154, 61, 0.1), transparent 24rem);
   animation: ambientMove 16s ease-in-out infinite alternate;
+  transform: translateZ(0); /* Hardware acceleration */
 }
 
 .section {
@@ -395,12 +396,13 @@ p {
 
 .waveform span {
   display: block;
-  height: var(--h, 15%);
-  min-height: 0.7rem;
+  height: 100%;
+  transform-origin: bottom;
+  transform: scaleY(var(--scale, 0.15));
   border-radius: 999px;
   background: linear-gradient(180deg, var(--cyan), var(--coral) 52%, var(--orange));
   opacity: 0.75;
-  transition: height 0.08s cubic-bezier(0.25, 1, 0.5, 1);
+  transition: transform 0.08s cubic-bezier(0.25, 1, 0.5, 1);
 }
 
 /* --- Uncluttered Playback Controls --- */
@@ -547,13 +549,15 @@ p {
 
 .engraved-wave span {
   flex: 1;
-  height: var(--h, 15%);
+  height: 100%;
+  transform-origin: bottom;
+  transform: scaleY(var(--scale, 0.15));
   border-radius: 999px;
   background: rgba(25, 11, 5, 0.82);
   box-shadow:
     inset 2px 0 2px rgba(255, 255, 255, 0.12),
     0 0 18px rgba(255, 214, 128, 0.24);
-  transition: height 0.08s cubic-bezier(0.25, 1, 0.5, 1);
+  transition: transform 0.08s cubic-bezier(0.25, 1, 0.5, 1);
   animation: etchedGlow 3.8s ease-in-out infinite;
 }
 
@@ -583,9 +587,12 @@ p {
   transition: all 200ms ease;
 }
 
-.translation-toggle:hover {
+.translation-toggle:hover,
+.translation-toggle:focus-visible {
   border-color: var(--cyan);
   background: rgba(72, 227, 255, 0.1);
+  outline: 2px solid var(--cyan);
+  outline-offset: 4px;
 }
 
 .lyrics-container {
@@ -609,7 +616,8 @@ p {
   max-height: 0;
   overflow: hidden;
   margin-top: 0;
-  transition: opacity 350ms ease, max-height 350ms ease, margin-top 350ms ease;
+  /* Removed CSS layout transitions to eliminate backdrop-filter recalculation lag on Android.
+     Animation is now fully hardware-accelerated via the View Transitions API in script.js */
 }
 
 /* Visible Translation Styling */
@@ -617,6 +625,17 @@ p {
   opacity: 0.78;
   max-height: 4rem;
   margin-top: 0.35rem;
+}
+
+/* --- View Transitions Configuration --- */
+::view-transition-old(lyrics-card),
+::view-transition-new(lyrics-card) {
+  /* Forces the container size to morph rather than just crossfade */
+  height: 100%;
+}
+
+.lyrics-section .glass-panel {
+  view-transition-name: lyrics-card;
 }
 
 /* --- Portrait Frame (CLS Eliminated) --- */
@@ -862,9 +881,19 @@ p {
   }
   .waveform {
     height: 7.2rem;
+    grid-template-columns: repeat(16, 1fr);
   }
   .section {
     padding-block: 4.6rem;
+  }
+  
+  /* Performance: Reduce glassmorphism load on mobile GPUs */
+  .player-card,
+  .glass-panel,
+  .birthday-card,
+  .instagram-panel {
+    backdrop-filter: blur(12px);
+    -webkit-backdrop-filter: blur(12px);
   }
 }
 

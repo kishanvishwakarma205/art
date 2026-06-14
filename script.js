@@ -66,8 +66,34 @@ document.addEventListener("DOMContentLoaded", () => {
     }
   }
 
+  // --- Intersection Observer to suspend Audio Visualizer when off-screen ---
+  let visibleVisualizersCount = 0;
+  const visualizerObserver = new IntersectionObserver((entries) => {
+    entries.forEach(entry => {
+      if (entry.isIntersecting) {
+        visibleVisualizersCount++;
+      } else {
+        visibleVisualizersCount = Math.max(0, visibleVisualizersCount - 1);
+      }
+    });
+    
+    if (visibleVisualizersCount > 0 && !audioAnimationId) {
+      drawVisualizers();
+    }
+  }, { threshold: 0.01 });
+
+  visualizerObserver.observe(document.getElementById("playerSection"));
+  const artSection = document.querySelector(".art-section");
+  if (artSection) visualizerObserver.observe(artSection);
+
   // Real-time Visualizer Paint Routine
   function drawVisualizers() {
+    // Performance Optimization: Stop loop if off-screen and not playing
+    if (visibleVisualizersCount === 0 && audio.paused) {
+      audioAnimationId = null;
+      return;
+    }
+
     if (!audio.paused) {
       if (isWebAudioActive && analyser) {
         const frequencies = new Uint8Array(analyser.frequencyBinCount);
@@ -76,27 +102,27 @@ document.addEventListener("DOMContentLoaded", () => {
         // Map live frequencies to the player waveform
         for (let i = 0; i < playerBarCount; i++) {
           const val = frequencies[i] || 0;
-          const height = (val / 255) * 100;
-          playerBarElements[i].style.setProperty("--h", `${Math.max(12, height)}%`);
+          const scale = val / 255;
+          playerBarElements[i].style.setProperty("--scale", Math.max(0.12, scale));
         }
 
         // Map alternate frequencies to the sound sculpture
         for (let i = 0; i < sculptureBarCount; i++) {
           const freqIndex = Math.floor(i * (frequencies.length / sculptureBarCount));
           const val = frequencies[freqIndex] || 0;
-          const height = (val / 255) * 100;
-          sculptureBarElements[i].style.setProperty("--h", `${Math.max(12, height)}%`);
+          const scale = val / 255;
+          sculptureBarElements[i].style.setProperty("--scale", Math.max(0.12, scale));
         }
       } else {
         // Organic Fallback Simulator if API is blocked or offline
         const time = Date.now() * 0.003;
         for (let i = 0; i < playerBarCount; i++) {
-          const pulse = 15 + Math.abs(Math.sin(time + i * 0.5) * Math.cos(time * 0.8 + i * 0.3)) * 75;
-          playerBarElements[i].style.setProperty("--h", `${Math.max(12, pulse)}%`);
+          const pulse = 0.15 + Math.abs(Math.sin(time + i * 0.5) * Math.cos(time * 0.8 + i * 0.3)) * 0.75;
+          playerBarElements[i].style.setProperty("--scale", Math.max(0.12, pulse));
         }
         for (let i = 0; i < sculptureBarCount; i++) {
-          const pulse = 15 + Math.abs(Math.sin(time * 0.7 + i * 0.4) * Math.cos(time * 1.2 + i * 0.2)) * 70;
-          sculptureBarElements[i].style.setProperty("--h", `${Math.max(12, pulse)}%`);
+          const pulse = 0.15 + Math.abs(Math.sin(time * 0.7 + i * 0.4) * Math.cos(time * 1.2 + i * 0.2)) * 0.70;
+          sculptureBarElements[i].style.setProperty("--scale", Math.max(0.12, pulse));
         }
       }
       audioAnimationId = requestAnimationFrame(drawVisualizers);
@@ -104,12 +130,12 @@ document.addEventListener("DOMContentLoaded", () => {
       // Idle wave breathing when paused
       const time = Date.now() * 0.001;
       for (let i = 0; i < playerBarCount; i++) {
-        const restingHeight = 15 + Math.sin(time + i * 0.4) * 5;
-        playerBarElements[i].style.setProperty("--h", `${restingHeight}%`);
+        const restingScale = 0.15 + Math.sin(time + i * 0.4) * 0.05;
+        playerBarElements[i].style.setProperty("--scale", restingScale);
       }
       for (let i = 0; i < sculptureBarCount; i++) {
-        const restingHeight = 15 + Math.sin(time * 0.8 + i * 0.3) * 4;
-        sculptureBarElements[i].style.setProperty("--h", `${restingHeight}%`);
+        const restingScale = 0.15 + Math.sin(time * 0.8 + i * 0.3) * 0.04;
+        sculptureBarElements[i].style.setProperty("--scale", restingScale);
       }
       audioAnimationId = requestAnimationFrame(drawVisualizers);
     }
@@ -257,28 +283,32 @@ document.addEventListener("DOMContentLoaded", () => {
   };
 
   const drawParticles = () => {
-    // Only repaint if canvas is on-screen and visible in active browser tab
-    if (isCanvasActive && document.visibilityState === "visible") {
-      ctx.clearRect(0, 0, window.innerWidth, window.innerHeight);
-
-      particles.forEach((particle) => {
-        particle.y -= particle.speed;
-        particle.x += particle.drift;
-
-        if (particle.y < -12) {
-          particle.y = window.innerHeight + 12;
-          particle.x = Math.random() * window.innerWidth;
-        }
-
-        if (particle.x < -12) particle.x = window.innerWidth + 12;
-        if (particle.x > window.innerWidth + 12) particle.x = -12;
-
-        ctx.beginPath();
-        ctx.fillStyle = particle.color;
-        ctx.arc(particle.x, particle.y, particle.size, 0, Math.PI * 2);
-        ctx.fill();
-      });
+    // Performance: Stop CPU loop if canvas is off-screen or tab is hidden
+    if (!isCanvasActive || document.visibilityState !== "visible") {
+      animationFrame = null;
+      return;
     }
+
+    ctx.clearRect(0, 0, window.innerWidth, window.innerHeight);
+
+    particles.forEach((particle) => {
+      particle.y -= particle.speed;
+      particle.x += particle.drift;
+
+      if (particle.y < -12) {
+        particle.y = window.innerHeight + 12;
+        particle.x = Math.random() * window.innerWidth;
+      }
+
+      if (particle.x < -12) particle.x = window.innerWidth + 12;
+      if (particle.x > window.innerWidth + 12) particle.x = -12;
+
+      ctx.beginPath();
+      ctx.fillStyle = particle.color;
+      ctx.arc(particle.x, particle.y, particle.size, 0, Math.PI * 2);
+      ctx.fill();
+    });
+
     animationFrame = window.requestAnimationFrame(drawParticles);
   };
 
@@ -286,6 +316,9 @@ document.addEventListener("DOMContentLoaded", () => {
   const canvasObserver = new IntersectionObserver((entries) => {
     entries.forEach(entry => {
       isCanvasActive = entry.isIntersecting;
+      if (isCanvasActive && !animationFrame) {
+        drawParticles();
+      }
     });
   }, { threshold: 0.02 });
   canvasObserver.observe(canvas);
@@ -297,7 +330,12 @@ document.addEventListener("DOMContentLoaded", () => {
     drawParticles();
   };
 
-  window.addEventListener("resize", resizeCanvas);
+  let resizeTimeout;
+  window.addEventListener("resize", () => {
+    clearTimeout(resizeTimeout);
+    resizeTimeout = setTimeout(resizeCanvas, 150);
+  });
+
   motionQuery.addEventListener("change", () => {
     if (motionQuery.matches) {
       window.cancelAnimationFrame(animationFrame);
@@ -310,16 +348,34 @@ document.addEventListener("DOMContentLoaded", () => {
   // Tab switching visibility optimization
   document.addEventListener("visibilitychange", () => {
     if (document.hidden) {
-      if (audioAnimationId) cancelAnimationFrame(audioAnimationId);
+      if (audioAnimationId) {
+        cancelAnimationFrame(audioAnimationId);
+        audioAnimationId = null;
+      }
     } else {
-      if (!audio.paused) drawVisualizers();
+      if (!audio.paused || visibleVisualizersCount > 0) {
+        if (!audioAnimationId) drawVisualizers();
+      }
+      if (isCanvasActive && !animationFrame) {
+        drawParticles();
+      }
     }
   });
 
   // --- Dynamic Lyrics Translation Module ---
   lyricsTranslateToggle.addEventListener("click", () => {
-    const displaying = lyricsContainer.classList.toggle("show-translation");
-    lyricsTranslateToggle.textContent = displaying ? "Show Originals" : "English Translation";
+    const toggleLogic = () => {
+      const displaying = lyricsContainer.classList.toggle("show-translation");
+      lyricsTranslateToggle.textContent = displaying ? "Show Originals" : "English Translation";
+    };
+    
+    // Use View Transitions API to GPU-accelerate the accordion expansion,
+    // completely bypassing the heavy backdrop-filter layout thrashing on Android.
+    if (document.startViewTransition) {
+      document.startViewTransition(toggleLogic);
+    } else {
+      toggleLogic();
+    }
   });
 
   // --- Climax Ceremony Celebration Trigger ---
@@ -346,6 +402,9 @@ document.addEventListener("DOMContentLoaded", () => {
       sparkle.style.animationDelay = `${Math.random() * 2}s`;
       sparkle.style.backgroundColor = colors[Math.floor(Math.random() * colors.length)];
       climaxSparkleLayer.appendChild(sparkle);
+      
+      // DOM Hygiene: sweep element after animation finishes (2.2s animation + up to 2s delay)
+      setTimeout(() => sparkle.remove(), 4500);
     }
   }
 
