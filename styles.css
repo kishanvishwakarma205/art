@@ -24,8 +24,6 @@ body {
   position: relative;
 }
 
-/* Faint wood-grain texture — barely visible, just enough to echo the
-   physical gift. Generated with SVG fractal noise, tinted warm brown. */
 body::before {
   content: "";
   position: fixed;
@@ -38,7 +36,6 @@ body::before {
   background-size: 320px 320px;
 }
 
-/* FIX 4: safe-area-inset padding for iPhone home indicator / Android nav bar */
 .page-shell {
   max-width: 600px;
   margin: 0 auto;
@@ -52,13 +49,11 @@ h1, h2, h3 {
   line-height: 1.2;
 }
 
-/* FIX 5: reduced minimum so h1 doesn't wrap into 5 lines on narrow phones */
 h1 {
   font-size: clamp(1.75rem, 6vw, 2.6rem);
   margin-bottom: 0.8rem;
 }
 
-/* FIX 5: extra reduction for very narrow Android screens (360px and under) */
 @media (max-width: 380px) {
   h1 {
     font-size: 1.6rem;
@@ -94,7 +89,6 @@ h2 {
   display: block;
 }
 
-/* FIX 1: tighter section padding on mobile; 3rem only on wider screens */
 .section {
   padding: 2rem 0;
   display: flex;
@@ -108,7 +102,6 @@ h2 {
   }
 }
 
-/* FIX 4: last section gets extra room above safe-area for the Instagram button */
 .tribute-section {
   padding-bottom: 2.5rem;
 }
@@ -200,7 +193,6 @@ body.is-playing .status-dot {
   margin-bottom: 1.5rem;
 }
 
-/* FIX 3: taller (14px vs 10px) and more opaque (0.65 vs 0.5) at rest */
 .wooden-wave span {
   display: block;
   width: 6px;
@@ -217,8 +209,6 @@ body.is-playing .wooden-wave span {
   animation-delay: var(--delay);
 }
 
-/* While real frequency data is driving the bars, hand off from the
-   looping keyframe to a quick transition so heights track the audio. */
 .wooden-wave.audio-reactive span {
   transition: height 0.08s ease-out;
 }
@@ -264,14 +254,9 @@ body.is-playing .wooden-wave.audio-reactive span {
   transform: scale(0.92);
 }
 
-/* Gentle glow inviting the first tap — removed once she presses play */
 @keyframes invitePulse {
-  0%, 100% {
-    box-shadow: 0 8px 16px rgba(212, 163, 115, 0.25), 0 0 0 0 rgba(212, 163, 115, 0.45);
-  }
-  50% {
-    box-shadow: 0 8px 16px rgba(212, 163, 115, 0.25), 0 0 0 14px rgba(212, 163, 115, 0);
-  }
+  0%, 100% { box-shadow: 0 8px 16px rgba(212, 163, 115, 0.25), 0 0 0 0 rgba(212, 163, 115, 0.45); }
+  50% { box-shadow: 0 8px 16px rgba(212, 163, 115, 0.25), 0 0 0 14px rgba(212, 163, 115, 0); }
 }
 
 .play-btn.invite-tap {
@@ -296,7 +281,6 @@ body.is-playing .wooden-wave.audio-reactive span {
   margin-bottom: 6px;
 }
 
-/* FIX 2: thumb now uses accent color instead of dark brown — much less jarring at 0:00 */
 .seek-bar::-webkit-slider-thumb {
   appearance: none;
   -webkit-appearance: none;
@@ -308,7 +292,6 @@ body.is-playing .wooden-wave.audio-reactive span {
   box-shadow: 0 0 0 3px rgba(212, 163, 115, 0.25);
 }
 
-/* FIX 2: Firefox range thumb support */
 .seek-bar::-moz-range-thumb {
   width: 12px;
   height: 12px;
@@ -386,29 +369,94 @@ body.is-playing .wooden-wave.audio-reactive span {
   margin-top: 1.5rem;
 }
 
+/* --- NEW: Polaroid Deck --- */
+.photo-deck-container {
+  position: relative;
+  width: 100%;
+  max-width: 280px;
+  /* Maintain a roughly polaroid aspect ratio so the container doesn't collapse */
+  aspect-ratio: 3 / 4; 
+  margin: 2rem auto 3rem auto;
+  cursor: pointer;
+  -webkit-tap-highlight-color: transparent;
+}
+
+.deck-hint {
+  position: absolute;
+  top: -25px;
+  right: -10px;
+  background: var(--accent);
+  color: #fff;
+  font-size: 0.75rem;
+  padding: 4px 10px;
+  border-radius: 20px;
+  font-weight: 600;
+  z-index: 100;
+  pointer-events: none;
+  transition: opacity 0.3s ease;
+  box-shadow: 0 4px 10px rgba(212, 163, 115, 0.3);
+}
+
+.deck-hint::after {
+  content: '';
+  position: absolute;
+  bottom: -4px;
+  left: 20px;
+  width: 8px;
+  height: 8px;
+  background: var(--accent);
+  transform: rotate(45deg);
+}
+
 .photo-frame {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
   background: white;
-  padding: 10px 10px 30px 10px;
+  padding: 10px 10px 40px 10px; /* Thicker bottom padding for the caption */
   border-radius: 4px;
-  box-shadow: 0 15px 35px rgba(62, 42, 33, 0.15);
-  transform: rotate(-2deg);
-  margin: 2rem auto;
-  max-width: 300px;
+  box-shadow: 0 8px 25px rgba(62, 42, 33, 0.12);
+  transform-origin: bottom center;
+  transition: transform 0.4s cubic-bezier(0.25, 1, 0.5, 1), opacity 0.3s ease, box-shadow 0.3s ease;
+  will-change: transform;
 }
 
 .photo-frame img {
   width: 100%;
-  height: auto;
+  height: 100%;
+  object-fit: cover; /* Ensures images fill the square without stretching */
   border-radius: 2px;
-  filter: sepia(0.2) contrast(1.05);
+  filter: sepia(0.15) contrast(1.05); /* Slight vintage warmth */
 }
 
 .photo-frame figcaption {
+  position: absolute;
+  bottom: 12px;
+  left: 0;
+  width: 100%;
   text-align: center;
-  margin-top: 12px;
   font-family: 'Lora', serif;
   font-style: italic;
+  font-size: 0.9rem;
   color: var(--text-muted);
+  padding: 0 10px;
+}
+
+/* Hover effect on desktop to encourage clicking */
+@media (hover: hover) {
+  .photo-deck-container:hover .photo-frame {
+    box-shadow: 0 12px 35px rgba(62, 42, 33, 0.2);
+  }
+}
+
+/* The animation when a card is tapped */
+.photo-frame.swipe-out {
+  /* Sweeps right and rotates slightly, fading out */
+  transform: translateX(60%) translateY(-10%) rotate(15deg) scale(0.95) !important;
+  opacity: 0;
+  box-shadow: none;
 }
 
 .instagram-link {
@@ -434,7 +482,7 @@ body.is-playing .wooden-wave.audio-reactive span {
 }
 
 @keyframes pulse {
-  0%   { transform: scale(0.95); box-shadow: 0 0 0 0 rgba(76, 175, 80, 0.7); }
-  70%  { transform: scale(1);    box-shadow: 0 0 0 6px rgba(76, 175, 80, 0); }
-  100% { transform: scale(0.95); box-shadow: 0 0 0 0 rgba(76, 175, 80, 0); }
+  0%   { transform: scale(0.95); box-shadow: 0 0 0 0 rgba(212, 163, 115, 0.7); }
+  70%  { transform: scale(1);    box-shadow: 0 0 0 6px rgba(212, 163, 115, 0); }
+  100% { transform: scale(0.95); box-shadow: 0 0 0 0 rgba(212, 163, 115, 0); }
 }

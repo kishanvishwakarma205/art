@@ -13,7 +13,6 @@ document.addEventListener("DOMContentLoaded", () => {
     },
     player: {
       title: "One Song. One Moment.",
-      // TODO: personalize this — e.g. the specific reason this clip, this line, this take
       caption: "A quiet moment we decided to keep safe."
     },
     story: {
@@ -42,8 +41,15 @@ document.addEventListener("DOMContentLoaded", () => {
     tribute: {
       accent: "A conspiracy of friends",
       title: "Happy Birthday, Sannidhi",
-      photoSrc: "photo.png",
-      photoCaption: "For the singer in the room.",
+      // NEW: Array of 6 photos and captions
+      photos: [
+        { src: "photos/photo.png", caption: "For the singer in the room." },
+        { src: "photos/photo2.jpeg", caption: "Caption for friend 2." },
+        { src: "photos/photo3.jpeg", caption: "Caption for friend 3." },
+        { src: "photos/photo4.jpeg", caption: "Caption for friend 4." },
+        { src: "photos/photo5.jpeg", caption: "Caption for friend 5." },
+        { src: "photos/photo6.jpeg", caption: "The whole Eww/Shii crew." }
+      ],
       paragraphs: [
         "Some people collect photos. Some collect memories. You seem to collect songs.",
         "From random conversations, late replies, shared jokes, and countless melodies - here's one voice we thought deserved a permanent place.",
@@ -92,8 +98,6 @@ document.addEventListener("DOMContentLoaded", () => {
   
   document.getElementById("tributeAccent").textContent = contentData.tribute.accent;
   document.getElementById("tributeTitle").textContent = contentData.tribute.title;
-  document.getElementById("tributePhoto").src = contentData.tribute.photoSrc;
-  document.getElementById("tributeCaption").textContent = contentData.tribute.photoCaption;
   document.getElementById("instagramLink").href = contentData.tribute.instagramUrl;
   
   const tributeContainer = document.getElementById("tributeContainer");
@@ -108,7 +112,73 @@ document.addEventListener("DOMContentLoaded", () => {
   tributeContainer.appendChild(sig);
 
   // ==========================================
-  // 3. PLAYER & ANIMATION LOGIC
+  // 3. INTERACTIVE POLAROID DECK
+  // ==========================================
+  const deckContainer = document.getElementById("photoDeck");
+  const baseRotations = [-4, 3, -2, 5, -3, 2]; // Staggered messy look
+
+  // Build the deck
+  contentData.tribute.photos.forEach((photoData, index) => {
+    const figure = document.createElement("figure");
+    figure.className = "photo-frame";
+    
+    // Reverse z-index so the first item in the array is on top
+    figure.style.zIndex = contentData.tribute.photos.length - index;
+    
+    // Assign a rotation based on index
+    const rotation = baseRotations[index % baseRotations.length];
+    figure.style.transform = `rotate(${rotation}deg)`;
+    figure.dataset.rotation = rotation; // Store it for later
+
+    figure.innerHTML = `
+      <img src="${photoData.src}" alt="Memory ${index + 1}" onerror="this.src='data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHdpZHRoPSIzMDAiIGhlaWdodD0iMzAwIj48cmVjdCB3aWR0aD0iMTAwJSIgaGVpZ2h0PSIxMDAlIiBmaWxsPSIjZWFlMGQ1Ii8+PHRleHQgeD0iNTAlIiB5PSI1MCUiIGZvbnQtZmFtaWx5PSJzYW5zLXNlcmlmIiBmb250LXNpemU9IjE0IiBmaWxsPSIjN2E2MzU1IiB0ZXh0LWFuY2hvcj0ibWlkZGxlIiBkeT0iLjNlbSI+UGhvdG8gUGxhY2Vob2xkZXI8L3RleHQ+PC9zdmc+'">
+      <figcaption>${photoData.caption}</figcaption>
+    `;
+    
+    deckContainer.appendChild(figure);
+  });
+
+  let isAnimating = false;
+
+  deckContainer.addEventListener("click", () => {
+    if (isAnimating) return; // Prevent spam clicking
+    
+    // Hide the hint after the first tap
+    const hint = deckContainer.querySelector('.deck-hint');
+    if (hint) hint.style.opacity = '0';
+
+    const cards = Array.from(deckContainer.querySelectorAll('.photo-frame'));
+    
+    // Find the current top card (highest z-index)
+    const topCard = cards.reduce((prev, current) => {
+      return parseInt(current.style.zIndex) > parseInt(prev.style.zIndex) ? current : prev;
+    });
+
+    isAnimating = true;
+    
+    // 1. Swipe it away
+    topCard.classList.add("swipe-out");
+
+    // 2. Wait for animation to finish, then reshuffle z-indexes
+    setTimeout(() => {
+      topCard.classList.remove("swipe-out");
+      
+      // Move top card to the back
+      cards.forEach(card => {
+        let z = parseInt(card.style.zIndex);
+        if (card === topCard) {
+          card.style.zIndex = 1;
+        } else {
+          card.style.zIndex = z + 1; // Bubble everything else up
+        }
+      });
+
+      isAnimating = false;
+    }, 400); // 400ms matches the CSS transition time
+  });
+
+  // ==========================================
+  // 4. PLAYER & ANIMATION LOGIC
   // ==========================================
   
   const audio = document.getElementById("song");
@@ -120,23 +190,16 @@ document.addEventListener("DOMContentLoaded", () => {
   const durationLabel = document.getElementById("duration");
   const translateToggle = document.getElementById("translateToggle");
 
-  // Build waveform bars
   const waveformContainer = document.getElementById("waveform");
   for (let i = 0; i < 20; i++) {
     const bar = document.createElement("span");
     const randomDelay = (Math.random() * 1.5).toFixed(2);
     bar.style.setProperty('--delay', `-${randomDelay}s`);
-    const restingHeight = Math.floor(Math.random() * 8) + 14; // FIX 3: baseline matches new CSS min of 14px
+    const restingHeight = Math.floor(Math.random() * 8) + 14; 
     bar.style.height = `${restingHeight}px`;
     bar.dataset.restingHeight = restingHeight;
     waveformContainer.appendChild(bar);
   }
-
-  // ==========================================
-  // 3b. AUDIO-REACTIVE WAVEFORM
-  // The bars now echo the real audio signal while it plays —
-  // the same "voice carved into a shape" idea as the physical gift.
-  // ==========================================
 
   let audioCtx = null;
   let analyser = null;
@@ -154,8 +217,6 @@ document.addEventListener("DOMContentLoaded", () => {
       analyser.connect(audioCtx.destination);
       dataArray = new Uint8Array(analyser.frequencyBinCount);
     } catch (err) {
-      // If Web Audio analysis isn't available, the bars simply keep
-      // their original gentle CSS pulse — never a broken experience.
       console.warn("Waveform analysis unavailable, using fallback animation:", err);
       audioCtx = null;
       analyser = null;
@@ -169,7 +230,7 @@ document.addEventListener("DOMContentLoaded", () => {
     const minBarHeight = 14;
     const maxBarHeight = 50;
     let silentFrames = 0;
-    const silentFrameLimit = 40; // roughly half a second of zero signal
+    const silentFrameLimit = 40;
 
     const loop = () => {
       if (audio.paused || audio.ended) return;
@@ -186,11 +247,6 @@ document.addEventListener("DOMContentLoaded", () => {
       if (peak === 0) {
         silentFrames++;
         if (silentFrames > silentFrameLimit) {
-          // The analyser isn't actually receiving any signal — most often
-          // because the page was opened directly as a file:// URL, which
-          // browsers can silently block from audio analysis even though
-          // playback itself works fine. Rather than leave the bars frozen
-          // flat, hand back to the original animated CSS pulse.
           stopWaveformAnimation();
           return;
         }
@@ -214,7 +270,6 @@ document.addEventListener("DOMContentLoaded", () => {
     });
   };
 
-
   const formatTime = (seconds) => {
     if (!Number.isFinite(seconds)) return "0:00";
     const mins = Math.floor(seconds / 60);
@@ -229,7 +284,6 @@ document.addEventListener("DOMContentLoaded", () => {
     if (duration > 0) {
       seekBar.value = (current / duration) * 100;
       const percent = seekBar.value;
-      // FIX 2: fill color now uses accent (#D4A373) to match the new thumb color
       seekBar.style.background = `linear-gradient(to right, #D4A373 0%, #D4A373 ${percent}%, #EAE0D5 ${percent}%, #EAE0D5 100%)`;
     }
     currentTimeLabel.textContent = formatTime(current);

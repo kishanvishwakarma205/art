@@ -2,7 +2,6 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8">
-  <!-- FIX 4: viewport-fit=cover enables env(safe-area-inset-*) on iPhones -->
   <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
   <meta name="theme-color" content="#FAF6F0">
   <title>Happy Birthday, Sannidhi</title>
@@ -73,10 +72,9 @@
       <span class="accent-text" id="tributeAccent"></span>
       <h2 id="tributeTitle"></h2>
       
-      <figure class="photo-frame">
-        <img id="tributePhoto" src="" alt="Sannidhi">
-        <figcaption id="tributeCaption"></figcaption>
-      </figure>
+      <div class="photo-deck-container" id="photoDeck">
+        <div class="deck-hint">Tap to flip</div>
+      </div>
 
       <div class="story-text" id="tributeContainer"></div>
 
