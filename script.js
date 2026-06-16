@@ -214,68 +214,6 @@ document.addEventListener("DOMContentLoaded", () => {
     });
   };
 
-  // ==========================================
-  // 3c. A SMALL CELEBRATORY MOMENT
-  // Fires once, the first time she actually hits play.
-  // ==========================================
-
-  let confettiFired = false;
-
-  const fireConfetti = (originX, originY) => {
-    const canvas = document.createElement("canvas");
-    canvas.style.position = "fixed";
-    canvas.style.inset = "0";
-    canvas.style.width = "100%";
-    canvas.style.height = "100%";
-    canvas.style.pointerEvents = "none";
-    canvas.style.zIndex = "9999";
-    canvas.width = window.innerWidth;
-    canvas.height = window.innerHeight;
-    document.body.appendChild(canvas);
-    const ctx = canvas.getContext("2d");
-
-    const colors = ["#D4A373", "#A67C52", "#F4E1C1", "#3E2A21", "#E8C39E"];
-    const particles = Array.from({ length: 60 }, () => ({
-      x: originX,
-      y: originY,
-      vx: (Math.random() - 0.5) * 8,
-      vy: -Math.random() * 9 - 3,
-      size: Math.random() * 6 + 4,
-      color: colors[Math.floor(Math.random() * colors.length)],
-      rotation: Math.random() * Math.PI * 2,
-      rotationSpeed: (Math.random() - 0.5) * 0.3,
-      gravity: 0.25 + Math.random() * 0.1,
-      life: 0,
-      maxLife: 80 + Math.random() * 30
-    }));
-
-    const frame = () => {
-      ctx.clearRect(0, 0, canvas.width, canvas.height);
-      let alive = false;
-      particles.forEach((p) => {
-        if (p.life >= p.maxLife) return;
-        alive = true;
-        p.life++;
-        p.x += p.vx;
-        p.y += p.vy;
-        p.vy += p.gravity;
-        p.rotation += p.rotationSpeed;
-        ctx.save();
-        ctx.translate(p.x, p.y);
-        ctx.rotate(p.rotation);
-        ctx.globalAlpha = 1 - p.life / p.maxLife;
-        ctx.fillStyle = p.color;
-        ctx.fillRect(-p.size / 2, -p.size / 4, p.size, p.size / 2);
-        ctx.restore();
-      });
-      if (alive) {
-        requestAnimationFrame(frame);
-      } else {
-        canvas.remove();
-      }
-    };
-    requestAnimationFrame(frame);
-  };
 
   const formatTime = (seconds) => {
     if (!Number.isFinite(seconds)) return "0:00";
@@ -336,11 +274,6 @@ document.addEventListener("DOMContentLoaded", () => {
     setPlayingState(true);
     playToggle.classList.remove("invite-tap");
     startWaveformAnimation();
-    if (!confettiFired) {
-      confettiFired = true;
-      const rect = playToggle.getBoundingClientRect();
-      fireConfetti(rect.left + rect.width / 2, rect.top + rect.height / 2);
-    }
   });
   audio.addEventListener("pause", () => {
     setPlayingState(false);
