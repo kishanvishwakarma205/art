@@ -116,12 +116,13 @@ document.addEventListener("DOMContentLoaded", () => {
   const durationLabel = document.getElementById("duration");
   const translateToggle = document.getElementById("translateToggle");
 
+  // Build waveform bars
   const waveformContainer = document.getElementById("waveform");
   for (let i = 0; i < 20; i++) {
     const bar = document.createElement("span");
     const randomDelay = (Math.random() * 1.5).toFixed(2);
     bar.style.setProperty('--delay', `-${randomDelay}s`);
-    const restingHeight = Math.floor(Math.random() * 10) + 10;
+    const restingHeight = Math.floor(Math.random() * 8) + 14; // FIX 3: baseline matches new CSS min of 14px
     bar.style.height = `${restingHeight}px`;
     waveformContainer.appendChild(bar);
   }
@@ -140,7 +141,8 @@ document.addEventListener("DOMContentLoaded", () => {
     if (duration > 0) {
       seekBar.value = (current / duration) * 100;
       const percent = seekBar.value;
-      seekBar.style.background = `linear-gradient(to right, #3E2A21 0%, #3E2A21 ${percent}%, #EAE0D5 ${percent}%, #EAE0D5 100%)`;
+      // FIX 2: fill color now uses accent (#D4A373) to match the new thumb color
+      seekBar.style.background = `linear-gradient(to right, #D4A373 0%, #D4A373 ${percent}%, #EAE0D5 ${percent}%, #EAE0D5 100%)`;
     }
     currentTimeLabel.textContent = formatTime(current);
     durationLabel.textContent = formatTime(duration);

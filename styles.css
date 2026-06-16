@@ -23,10 +23,12 @@ body {
   -webkit-font-smoothing: antialiased;
 }
 
+/* FIX 4: safe-area-inset padding for iPhone home indicator / Android nav bar */
 .page-shell {
   max-width: 600px;
   margin: 0 auto;
   padding: 0 20px;
+  padding-bottom: env(safe-area-inset-bottom, 0px);
 }
 
 h1, h2, h3 {
@@ -35,9 +37,17 @@ h1, h2, h3 {
   line-height: 1.2;
 }
 
+/* FIX 5: reduced minimum so h1 doesn't wrap into 5 lines on narrow phones */
 h1 {
-  font-size: clamp(2rem, 6vw, 2.6rem);
+  font-size: clamp(1.75rem, 6vw, 2.6rem);
   margin-bottom: 0.8rem;
+}
+
+/* FIX 5: extra reduction for very narrow Android screens (360px and under) */
+@media (max-width: 380px) {
+  h1 {
+    font-size: 1.6rem;
+  }
 }
 
 h2 {
@@ -61,12 +71,23 @@ h2 {
   display: block;
 }
 
+/* FIX 1: tighter section padding on mobile; 3rem only on wider screens */
 .section {
-  /* Removed 100svh and reduced padding heavily */
-  padding: 3rem 0;
+  padding: 2rem 0;
   display: flex;
   flex-direction: column;
   justify-content: center;
+}
+
+@media (min-width: 601px) {
+  .section {
+    padding: 3rem 0;
+  }
+}
+
+/* FIX 4: last section gets extra room above safe-area for the Instagram button */
+.tribute-section {
+  padding-bottom: 2.5rem;
 }
 
 /* --- Interactive Elements --- */
@@ -94,7 +115,7 @@ h2 {
   font-size: 0.85rem;
 }
 
-/* --- Player Card Redesign --- */
+/* --- Player Card --- */
 .player-card {
   background: var(--card-bg);
   border-radius: 20px;
@@ -152,17 +173,18 @@ body.is-playing .status-dot {
   align-items: center;
   justify-content: center;
   gap: 4px;
-  height: clamp(30px, 6vh, 45px); /* Tightened height */
+  height: clamp(30px, 6vh, 45px);
   margin-bottom: 1.5rem;
 }
 
+/* FIX 3: taller (14px vs 10px) and more opaque (0.65 vs 0.5) at rest */
 .wooden-wave span {
   display: block;
   width: 6px;
-  height: 10px;
+  height: 14px;
   background: linear-gradient(180deg, #D4A373, #A67C52);
   border-radius: 4px;
-  opacity: 0.5;
+  opacity: 0.65;
   transition: height 0.2s ease, opacity 0.2s ease;
 }
 
@@ -173,11 +195,11 @@ body.is-playing .wooden-wave span {
 }
 
 @keyframes carveWave {
-  0% { height: 10px; }
+  0%   { height: 14px; }
   100% { height: 100%; }
 }
 
-/* --- Compact Player Controls --- */
+/* --- Player Controls --- */
 .player-controls {
   display: flex;
   align-items: center;
@@ -189,7 +211,7 @@ body.is-playing .wooden-wave span {
   background: var(--accent);
   color: white;
   border: none;
-  width: clamp(50px, 10vw, 55px); 
+  width: clamp(50px, 10vw, 55px);
   height: clamp(50px, 10vw, 55px);
   border-radius: 50%;
   cursor: pointer;
@@ -227,15 +249,27 @@ body.is-playing .wooden-wave span {
   margin-bottom: 6px;
 }
 
+/* FIX 2: thumb now uses accent color instead of dark brown — much less jarring at 0:00 */
 .seek-bar::-webkit-slider-thumb {
   appearance: none;
   -webkit-appearance: none;
-  width: 14px;
-  height: 14px;
+  width: 12px;
+  height: 12px;
   border-radius: 50%;
-  background: var(--text-main);
+  background: var(--accent);
   cursor: pointer;
-  box-shadow: 0 0 0 4px rgba(212, 163, 115, 0.2);
+  box-shadow: 0 0 0 3px rgba(212, 163, 115, 0.25);
+}
+
+/* FIX 2: Firefox range thumb support */
+.seek-bar::-moz-range-thumb {
+  width: 12px;
+  height: 12px;
+  border-radius: 50%;
+  background: var(--accent);
+  cursor: pointer;
+  border: none;
+  box-shadow: 0 0 0 3px rgba(212, 163, 115, 0.25);
 }
 
 .time-row {
@@ -335,7 +369,7 @@ body.is-playing .wooden-wave span {
   margin-top: 2rem;
 }
 
-/* --- System Animations --- */
+/* --- Reveal Animation --- */
 .reveal {
   opacity: 0;
   transform: translateY(20px);
@@ -349,11 +383,11 @@ body.is-playing .wooden-wave span {
 
 @keyframes fadeIn {
   from { opacity: 0; transform: translateY(-5px); }
-  to { opacity: 1; transform: translateY(0); }
+  to   { opacity: 1; transform: translateY(0); }
 }
 
 @keyframes pulse {
-  0% { transform: scale(0.95); box-shadow: 0 0 0 0 rgba(76, 175, 80, 0.7); }
-  70% { transform: scale(1); box-shadow: 0 0 0 6px rgba(76, 175, 80, 0); }
+  0%   { transform: scale(0.95); box-shadow: 0 0 0 0 rgba(76, 175, 80, 0.7); }
+  70%  { transform: scale(1);    box-shadow: 0 0 0 6px rgba(76, 175, 80, 0); }
   100% { transform: scale(0.95); box-shadow: 0 0 0 0 rgba(76, 175, 80, 0); }
 }
