@@ -8,11 +8,13 @@ document.addEventListener("DOMContentLoaded", () => {
     hero: {
       accent: "Hidden in the grain",
       title: "I managed to hide your voice inside a piece of wood.",
-      subtitle: "Not forever, though. Tap below and listen to the echo it left behind."
+      subtitle: "Not forever, though. Tap below and listen to the echo it left behind.",
+      note: "Yes — the very one you're holding right now."
     },
     player: {
       title: "One Song. One Moment.",
-      caption: "Captured from one of Sannidhi's Instagram reels."
+      // TODO: personalize this — e.g. the specific reason this clip, this line, this take
+      caption: "A quiet moment we decided to keep safe."
     },
     story: {
       accent: "Voice as object",
@@ -22,6 +24,7 @@ document.addEventListener("DOMContentLoaded", () => {
         "This one became a pattern.",
         "A vibration.",
         "A line carved into wood.",
+        "Underneath that pattern, tucked about four millimetres into the grain, sits a small chip — silent until something gets close enough to ask it a question.",
         "A small reminder that beautiful things do not always have to disappear."
       ]
     },
@@ -60,6 +63,7 @@ document.addEventListener("DOMContentLoaded", () => {
   document.getElementById("heroAccent").textContent = contentData.hero.accent;
   document.getElementById("heroTitle").textContent = contentData.hero.title;
   document.getElementById("heroSubtitle").textContent = contentData.hero.subtitle;
+  document.getElementById("heroNote").textContent = contentData.hero.note;
   
   document.getElementById("playerTitle").textContent = contentData.player.title;
   document.getElementById("playerCaption").textContent = contentData.player.caption;
@@ -124,8 +128,154 @@ document.addEventListener("DOMContentLoaded", () => {
     bar.style.setProperty('--delay', `-${randomDelay}s`);
     const restingHeight = Math.floor(Math.random() * 8) + 14; // FIX 3: baseline matches new CSS min of 14px
     bar.style.height = `${restingHeight}px`;
+    bar.dataset.restingHeight = restingHeight;
     waveformContainer.appendChild(bar);
   }
+
+  // ==========================================
+  // 3b. AUDIO-REACTIVE WAVEFORM
+  // The bars now echo the real audio signal while it plays —
+  // the same "voice carved into a shape" idea as the physical gift.
+  // ==========================================
+
+  let audioCtx = null;
+  let analyser = null;
+  let dataArray = null;
+  let waveformRAF = null;
+
+  const setupAudioContext = () => {
+    if (audioCtx) return;
+    try {
+      audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+      const sourceNode = audioCtx.createMediaElementSource(audio);
+      analyser = audioCtx.createAnalyser();
+      analyser.fftSize = 64;
+      sourceNode.connect(analyser);
+      analyser.connect(audioCtx.destination);
+      dataArray = new Uint8Array(analyser.frequencyBinCount);
+    } catch (err) {
+      // If Web Audio analysis isn't available, the bars simply keep
+      // their original gentle CSS pulse — never a broken experience.
+      console.warn("Waveform analysis unavailable, using fallback animation:", err);
+      audioCtx = null;
+      analyser = null;
+    }
+  };
+
+  const startWaveformAnimation = () => {
+    if (!analyser) return;
+    waveformContainer.classList.add("audio-reactive");
+    const bars = waveformContainer.querySelectorAll("span");
+    const minBarHeight = 14;
+    const maxBarHeight = 50;
+    let silentFrames = 0;
+    const silentFrameLimit = 40; // roughly half a second of zero signal
+
+    const loop = () => {
+      if (audio.paused || audio.ended) return;
+      analyser.getByteFrequencyData(dataArray);
+
+      let peak = 0;
+      bars.forEach((bar, i) => {
+        const value = dataArray[Math.floor((i * dataArray.length) / bars.length)];
+        if (value > peak) peak = value;
+        const height = minBarHeight + (value / 255) * (maxBarHeight - minBarHeight);
+        bar.style.height = `${height}px`;
+      });
+
+      if (peak === 0) {
+        silentFrames++;
+        if (silentFrames > silentFrameLimit) {
+          // The analyser isn't actually receiving any signal — most often
+          // because the page was opened directly as a file:// URL, which
+          // browsers can silently block from audio analysis even though
+          // playback itself works fine. Rather than leave the bars frozen
+          // flat, hand back to the original animated CSS pulse.
+          stopWaveformAnimation();
+          return;
+        }
+      } else {
+        silentFrames = 0;
+      }
+
+      waveformRAF = requestAnimationFrame(loop);
+    };
+    waveformRAF = requestAnimationFrame(loop);
+  };
+
+  const stopWaveformAnimation = () => {
+    if (waveformRAF) {
+      cancelAnimationFrame(waveformRAF);
+      waveformRAF = null;
+    }
+    waveformContainer.classList.remove("audio-reactive");
+    waveformContainer.querySelectorAll("span").forEach((bar) => {
+      bar.style.height = `${bar.dataset.restingHeight}px`;
+    });
+  };
+
+  // ==========================================
+  // 3c. A SMALL CELEBRATORY MOMENT
+  // Fires once, the first time she actually hits play.
+  // ==========================================
+
+  let confettiFired = false;
+
+  const fireConfetti = (originX, originY) => {
+    const canvas = document.createElement("canvas");
+    canvas.style.position = "fixed";
+    canvas.style.inset = "0";
+    canvas.style.width = "100%";
+    canvas.style.height = "100%";
+    canvas.style.pointerEvents = "none";
+    canvas.style.zIndex = "9999";
+    canvas.width = window.innerWidth;
+    canvas.height = window.innerHeight;
+    document.body.appendChild(canvas);
+    const ctx = canvas.getContext("2d");
+
+    const colors = ["#D4A373", "#A67C52", "#F4E1C1", "#3E2A21", "#E8C39E"];
+    const particles = Array.from({ length: 60 }, () => ({
+      x: originX,
+      y: originY,
+      vx: (Math.random() - 0.5) * 8,
+      vy: -Math.random() * 9 - 3,
+      size: Math.random() * 6 + 4,
+      color: colors[Math.floor(Math.random() * colors.length)],
+      rotation: Math.random() * Math.PI * 2,
+      rotationSpeed: (Math.random() - 0.5) * 0.3,
+      gravity: 0.25 + Math.random() * 0.1,
+      life: 0,
+      maxLife: 80 + Math.random() * 30
+    }));
+
+    const frame = () => {
+      ctx.clearRect(0, 0, canvas.width, canvas.height);
+      let alive = false;
+      particles.forEach((p) => {
+        if (p.life >= p.maxLife) return;
+        alive = true;
+        p.life++;
+        p.x += p.vx;
+        p.y += p.vy;
+        p.vy += p.gravity;
+        p.rotation += p.rotationSpeed;
+        ctx.save();
+        ctx.translate(p.x, p.y);
+        ctx.rotate(p.rotation);
+        ctx.globalAlpha = 1 - p.life / p.maxLife;
+        ctx.fillStyle = p.color;
+        ctx.fillRect(-p.size / 2, -p.size / 4, p.size, p.size / 2);
+        ctx.restore();
+      });
+      if (alive) {
+        requestAnimationFrame(frame);
+      } else {
+        canvas.remove();
+      }
+    };
+    requestAnimationFrame(frame);
+  };
 
   const formatTime = (seconds) => {
     if (!Number.isFinite(seconds)) return "0:00";
@@ -153,15 +303,21 @@ document.addEventListener("DOMContentLoaded", () => {
       document.body.classList.add("is-playing");
       playIcon.style.display = "none";
       pauseIcon.style.display = "block";
+      playToggle.setAttribute("aria-label", "Pause song");
     } else {
       document.body.classList.remove("is-playing");
       playIcon.style.display = "block";
       pauseIcon.style.display = "none";
+      playToggle.setAttribute("aria-label", "Play song");
     }
   };
 
   playToggle.addEventListener("click", () => {
     if (audio.paused) {
+      setupAudioContext();
+      if (audioCtx && audioCtx.state === "suspended") {
+        audioCtx.resume();
+      }
       audio.play().catch(e => console.error("Playback prevented:", e));
     } else {
       audio.pause();
@@ -176,10 +332,23 @@ document.addEventListener("DOMContentLoaded", () => {
 
   audio.addEventListener("loadedmetadata", updateProgress);
   audio.addEventListener("timeupdate", updateProgress);
-  audio.addEventListener("play", () => setPlayingState(true));
-  audio.addEventListener("pause", () => setPlayingState(false));
+  audio.addEventListener("play", () => {
+    setPlayingState(true);
+    playToggle.classList.remove("invite-tap");
+    startWaveformAnimation();
+    if (!confettiFired) {
+      confettiFired = true;
+      const rect = playToggle.getBoundingClientRect();
+      fireConfetti(rect.left + rect.width / 2, rect.top + rect.height / 2);
+    }
+  });
+  audio.addEventListener("pause", () => {
+    setPlayingState(false);
+    stopWaveformAnimation();
+  });
   audio.addEventListener("ended", () => {
     setPlayingState(false);
+    stopWaveformAnimation();
     audio.currentTime = 0;
     updateProgress();
   });
