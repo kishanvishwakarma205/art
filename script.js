@@ -44,17 +44,11 @@ document.addEventListener("DOMContentLoaded", () => {
       // NEW: Array of 6 photos and captions
       photos: [
         { src: "photos/photo.png", caption: "For the singer in the room." },
-        { src: "photos/photo2.jpeg", caption: "Caption" },
-        { src: "photos/photo3.jpeg", caption: "Caption" },
-        { src: "photos/photo4.jpeg", caption: "Caption" },
-        { src: "photos/photo5.jpeg", caption: "Caption" },
-        { src: "photos/photo6.jpeg", caption: "Caption" },
         { src: "photos/01.jpeg", caption: "Caption" },
         { src: "photos/02.jpeg", caption: "Caption" },
         { src: "photos/03.jpeg", caption: "Caption" },
         { src: "photos/04.jpeg", caption: "Caption" },
         { src: "photos/05.jpeg", caption: "Caption" },
-        { src: "photos/06.jpeg", caption: "Caption" },
         { src: "photos/07.jpeg", caption: "Caption" },
         { src: "photos/08.jpeg", caption: "Caption" },
         { src: "photos/09.jpeg", caption: "Caption" },
