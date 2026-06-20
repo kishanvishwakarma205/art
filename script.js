@@ -50,7 +50,6 @@ document.addEventListener("DOMContentLoaded", () => {
         { src: "photos/04.jpeg", caption: "Caption" },
         { src: "photos/05.jpeg", caption: "Caption" },
         { src: "photos/07.jpeg", caption: "Caption" },
-        { src: "photos/08.jpeg", caption: "Caption" },
         { src: "photos/09.jpeg", caption: "Caption" },
         { src: "photos/10.jpeg", caption: "Caption" },
         { src: "photos/12.jpeg", caption: "Caption" },
@@ -126,6 +125,33 @@ document.addEventListener("DOMContentLoaded", () => {
   const deckContainer = document.getElementById("photoDeck");
   const baseRotations = [-4, 3, -2, 5, -3, 2]; // Staggered messy look
 
+  // --- Dynamic sizing: the card morphs to match each photo's real shape ---
+  const DEFAULT_ASPECT = 3 / 4;     // portrait fallback while an image is still loading
+  const MIN_CARD_HEIGHT = 220;      // guard rails so very wide/tall photos don't break the layout
+  const MAX_CARD_HEIGHT = 460;
+  const FRAME_PAD_X = 20;           // 10px left + 10px right (.photo-frame padding)
+  const FRAME_PAD_Y = 50;           // 10px top + 40px bottom (.photo-frame padding)
+
+  let currentTopCard = null;
+
+  const resizeDeckToCard = (figure, animate = true) => {
+    if (!figure) return;
+    const containerWidth = deckContainer.getBoundingClientRect().width || 280;
+    const aspect = parseFloat(figure.dataset.aspect) || DEFAULT_ASPECT; // width / height
+    const photoWindowWidth = containerWidth - FRAME_PAD_X;
+    let targetHeight = (photoWindowWidth / aspect) + FRAME_PAD_Y;
+    targetHeight = Math.min(MAX_CARD_HEIGHT, Math.max(MIN_CARD_HEIGHT, targetHeight));
+
+    if (!animate) {
+      deckContainer.style.transition = "none";
+    }
+    deckContainer.style.height = `${targetHeight}px`;
+    if (!animate) {
+      void deckContainer.offsetHeight; // force reflow before re-enabling transition
+      deckContainer.style.transition = "";
+    }
+  };
+
   // Build the deck
   contentData.tribute.photos.forEach((photoData, index) => {
     const figure = document.createElement("figure");
@@ -145,7 +171,28 @@ document.addEventListener("DOMContentLoaded", () => {
     `;
     
     deckContainer.appendChild(figure);
+
+    // Measure the photo's real aspect ratio as soon as it's available
+    const imgEl = figure.querySelector("img");
+    const recordAspect = () => {
+      if (imgEl.naturalWidth && imgEl.naturalHeight) {
+        figure.dataset.aspect = imgEl.naturalWidth / imgEl.naturalHeight;
+        // If this photo is the one currently on top, fit the card to it now
+        if (figure === currentTopCard) {
+          resizeDeckToCard(figure);
+        }
+      }
+    };
+    if (imgEl.complete) {
+      recordAspect();
+    } else {
+      imgEl.addEventListener("load", recordAspect, { once: true });
+    }
   });
+
+  // The first photo in the array starts on top — size the card to it immediately, no animation
+  currentTopCard = deckContainer.querySelector(".photo-frame");
+  resizeDeckToCard(currentTopCard, false);
 
   let isAnimating = false;
 
@@ -158,15 +205,17 @@ document.addEventListener("DOMContentLoaded", () => {
 
     const cards = Array.from(deckContainer.querySelectorAll('.photo-frame'));
     
-    // Find the current top card (highest z-index)
-    const topCard = cards.reduce((prev, current) => {
-      return parseInt(current.style.zIndex) > parseInt(prev.style.zIndex) ? current : prev;
-    });
+    // Find the current top card (highest z-index) and the one underneath it
+    const sortedByZ = [...cards].sort((a, b) => parseInt(b.style.zIndex) - parseInt(a.style.zIndex));
+    const topCard = sortedByZ[0];
+    const nextCard = sortedByZ[1] || topCard;
 
     isAnimating = true;
+    currentTopCard = nextCard;
     
-    // 1. Swipe it away
+    // 1. Swipe it away, and let the card morph to the next photo's shape at the same time
     topCard.classList.add("swipe-out");
+    resizeDeckToCard(nextCard);
 
     // 2. Wait for animation to finish, then reshuffle z-indexes
     setTimeout(() => {
@@ -221,7 +270,7 @@ document.addEventListener("DOMContentLoaded", () => {
       audioCtx = new (window.AudioContext || window.webkitAudioContext)();
       const sourceNode = audioCtx.createMediaElementSource(audio);
       analyser = audioCtx.createAnalyser();
-      analyser.fftSize = 64;
+      analyser.fftSize = 128;
       sourceNode.connect(analyser);
       analyser.connect(audioCtx.destination);
       dataArray = new Uint8Array(analyser.frequencyBinCount);
@@ -241,13 +290,33 @@ document.addEventListener("DOMContentLoaded", () => {
     let silentFrames = 0;
     const silentFrameLimit = 40;
 
+    // Precompute a logarithmic bin range per bar instead of one raw bin per bar.
+    // Voice/music energy is concentrated in the low end, so a straight linear
+    // mapping (bar i -> bin i) leaves the right-hand bars almost always flat.
+    // Grouping bins logarithmically + boosting the higher bars compensates for that.
+    const binCount = dataArray.length;
+    const barBinRanges = Array.from({ length: bars.length }, (_, i) => {
+      const t0 = i / bars.length;
+      const t1 = (i + 1) / bars.length;
+      const start = Math.floor(Math.pow(t0, 1.8) * (binCount - 1));
+      const end = Math.max(start + 1, Math.floor(Math.pow(t1, 1.8) * (binCount - 1)));
+      return [start, Math.min(end, binCount)];
+    });
+    const gainCurve = Array.from({ length: bars.length }, (_, i) =>
+      1 + (i / Math.max(1, bars.length - 1)) * 1.8
+    );
+
     const loop = () => {
       if (audio.paused || audio.ended) return;
       analyser.getByteFrequencyData(dataArray);
 
       let peak = 0;
       bars.forEach((bar, i) => {
-        const value = dataArray[Math.floor((i * dataArray.length) / bars.length)];
+        const [start, end] = barBinRanges[i];
+        let sum = 0;
+        for (let b = start; b < end; b++) sum += dataArray[b];
+        const avg = sum / (end - start);
+        const value = Math.min(255, avg * gainCurve[i]);
         if (value > peak) peak = value;
         const height = minBarHeight + (value / 255) * (maxBarHeight - minBarHeight);
         bar.style.height = `${height}px`;
