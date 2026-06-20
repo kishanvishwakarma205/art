@@ -44,19 +44,20 @@ document.addEventListener("DOMContentLoaded", () => {
       // NEW: Array of 6 photos and captions
       photos: [
         { src: "photos/photo.png", caption: "For the singer in the room." },
-        { src: "photos/01.jpeg", caption: "Caption" },
         { src: "photos/02.jpeg", caption: "Caption" },
         { src: "photos/03.jpeg", caption: "Caption" },
         { src: "photos/04.jpeg", caption: "Caption" },
         { src: "photos/05.jpeg", caption: "Caption" },
         { src: "photos/07.jpeg", caption: "Caption" },
-        { src: "photos/09.jpeg", caption: "Caption" },
         { src: "photos/10.jpeg", caption: "Caption" },
         { src: "photos/12.jpeg", caption: "Caption" },
         { src: "photos/13.jpeg", caption: "Caption" },
         { src: "photos/14.jpeg", caption: "Caption" },
         { src: "photos/15.jpeg", caption: "Caption" },
         { src: "photos/16.jpeg", caption: "Caption" },
+        { src: "photos/01.jpeg", caption: "Caption" },
+        { src: "photos/06.jpeg", caption: "Caption" },
+        { src: "photos/09.jpeg", caption: "Caption" },
       ],
       paragraphs: [
         "Some people collect photos. Some collect memories. You seem to collect songs.",
