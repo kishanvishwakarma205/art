@@ -53,7 +53,6 @@ document.addEventListener("DOMContentLoaded", () => {
         { src: "photos/08.jpeg", caption: "Caption" },
         { src: "photos/09.jpeg", caption: "Caption" },
         { src: "photos/10.jpeg", caption: "Caption" },
-        { src: "photos/11.jpeg", caption: "Caption" },
         { src: "photos/12.jpeg", caption: "Caption" },
         { src: "photos/13.jpeg", caption: "Caption" },
         { src: "photos/14.jpeg", caption: "Caption" },
