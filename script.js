@@ -7,24 +7,30 @@ document.addEventListener("DOMContentLoaded", () => {
     audioSrc: "song.mp3",
     hero: {
       accent: "Hidden in the grain",
-      title: "I managed to hide your voice inside a piece of wood.",
-      subtitle: "Not forever, though. Tap below and listen to the echo it left behind.",
+      title: "We couldn't preserve the moment, but we managed to preserve its most beautiful part—your voice. ",
+      subtitle: [
+        "Hidden within this piece of wood is a melody that carries a piece of your soul.",
+        "Though moments pass, your music lives on, waiting to be heard with a single tap."
+      ],
       note: "Yes — the very one you're holding right now."
     },
     player: {
       title: "One Song. One Moment.",
-      caption: "A quiet moment we decided to keep safe."
+      caption: "Music ends. Echoes remain. This is one of those echoes."
     },
     story: {
-      accent: "Voice as object",
+      accent: "",
       title: "The Shape of a Song",
       paragraphs: [
-        "Most songs exist for only a few minutes.",
-        "This one became a pattern.",
-        "A vibration.",
+        "Every note leaves a trace.",
+        "Yours became a pattern.",
+        "A waveform.",
         "A line carved into wood.",
-        "Underneath that pattern, tucked about four millimetres into the grain, sits a small chip — silent until something gets close enough to ask it a question.",
-        "A small reminder that beautiful things do not always have to disappear."
+        "Beneath that line lies something almost invisible—a tiny NFC chip holding the very voice that created it.",
+        "It waits quietly until someone taps.",
+        "Then the wood sings again.",
+        "A reminder that beautiful things don't always disappear.",
+        "Sometimes, they simply learn a new way to stay."
       ]
     },
     lyrics: {
@@ -44,25 +50,29 @@ document.addEventListener("DOMContentLoaded", () => {
       // NEW: Array of 6 photos and captions
       photos: [
         { src: "photos/image.png", caption: "For the singer in the room." },
-        { src: "photos/01.jpeg", caption: "Caption" },
-        { src: "photos/06.jpeg", caption: "Caption" },
-        { src: "photos/09.jpeg", caption: "Caption" },
-        { src: "photos/02.jpeg", caption: "Caption" },
-        { src: "photos/03.jpeg", caption: "Caption" },
-        { src: "photos/04.jpeg", caption: "Caption" },
-        { src: "photos/05.jpeg", caption: "Caption" },
-        { src: "photos/07.jpeg", caption: "Caption" },
-        { src: "photos/10.jpeg", caption: "Caption" },
-        { src: "photos/12.jpeg", caption: "Caption" },
-        { src: "photos/13.jpeg", caption: "Caption" },
-        { src: "photos/14.jpeg", caption: "Caption" },
-        { src: "photos/15.jpeg", caption: "Caption" },
-        { src: "photos/16.jpeg", caption: "Caption" },
+        { src: "photos/09.jpeg", caption: "One photo. Countless memories." },
+        { src: "photos/01.jpeg", caption: "Smiles that never needed a reason." },
+        { src: "photos/06.jpeg", caption: "The kind of moments you never plan, but never forget." },
+        { src: "photos/13.jpeg", caption: "Just a bunch of people making ordinary days unforgettable." },
+        { src: "photos/07.jpeg", caption: "Where laughter was always louder than the plans." },
+        { src: "photos/04.jpeg", caption: "Some friendships simply feel like home." },
+        { src: "photos/05.jpeg", caption: "The camera captured us. The memories captured our hearts." },
+        { src: "photos/03.jpeg", caption: "Another page in our story." },
+        { src: "photos/02.jpeg", caption: "A moment worth reliving." },
+        { src: "photos/15.jpeg", caption: "Together, we made the ordinary extraordinary." },
+        { src: "photos/12.jpeg", caption: "The smiles were real. So were the memories." },
+        { src: "photos/10.jpeg", caption: "Time moved on. This moment stayed." },
+        { src: "photos/14.jpeg", caption: "None of us knew this day would become the beginning of so many memories." },
+        { src: "photos/16.jpeg", caption: "The best part wasn't the degree. It was the people we earned it with." },
       ],
       paragraphs: [
-        "Some people collect photos. Some collect memories. You seem to collect songs.",
-        "From random conversations, late replies, shared jokes, and countless melodies - here's one voice we thought deserved a permanent place.",
-        "May this year bring new adventures and many more reasons to keep singing."
+        "Some people collect photographs.",
+        "Some collect memories.",
+        "You seem to collect songs.",
+        "So we thought we'd give you something that holds all three.",
+        "From random conversations, late replies, inside jokes, spontaneous plans, and countless melodies, these moments became a story worth keeping.",
+        "May this year bring you new adventures, beautiful memories, and countless reasons to keep singing.",
+        "With love,"
       ],
       signature: "- Eww/Shii",
       instagramUrl: "https://www.instagram.com/_sannidhiii_/"
@@ -77,7 +87,13 @@ document.addEventListener("DOMContentLoaded", () => {
   
   document.getElementById("heroAccent").textContent = contentData.hero.accent;
   document.getElementById("heroTitle").textContent = contentData.hero.title;
-  document.getElementById("heroSubtitle").textContent = contentData.hero.subtitle;
+  const heroSubtitleEl = document.getElementById("heroSubtitle");
+  contentData.hero.subtitle.forEach(line => {
+    const p = document.createElement("p");
+    p.className = "subtitle";
+    p.textContent = line;
+    heroSubtitleEl.appendChild(p);
+  });
   document.getElementById("heroNote").textContent = contentData.hero.note;
   
   document.getElementById("playerTitle").textContent = contentData.player.title;
@@ -131,7 +147,7 @@ document.addEventListener("DOMContentLoaded", () => {
   const MIN_CARD_HEIGHT = 220;      // guard rails so very wide/tall photos don't break the layout
   const MAX_CARD_HEIGHT = 460;
   const FRAME_PAD_X = 20;           // 10px left + 10px right (.photo-frame padding)
-  const FRAME_PAD_Y = 50;           // 10px top + 40px bottom (.photo-frame padding)
+  const FRAME_PAD_TOP = 10;         // top padding only — caption height is measured per-card below
 
   let currentTopCard = null;
 
@@ -140,7 +156,14 @@ document.addEventListener("DOMContentLoaded", () => {
     const containerWidth = deckContainer.getBoundingClientRect().width || 280;
     const aspect = parseFloat(figure.dataset.aspect) || DEFAULT_ASPECT; // width / height
     const photoWindowWidth = containerWidth - FRAME_PAD_X;
-    let targetHeight = (photoWindowWidth / aspect) + FRAME_PAD_Y;
+
+    // Measure this card's actual caption height (1 line vs. 2+ lines) instead
+    // of assuming a fixed amount of space, so long captions get the room
+    // they need and short ones don't leave awkward empty space.
+    const captionEl = figure.querySelector("figcaption");
+    const captionHeight = captionEl ? captionEl.getBoundingClientRect().height : 30;
+
+    let targetHeight = (photoWindowWidth / aspect) + FRAME_PAD_TOP + captionHeight;
     targetHeight = Math.min(MAX_CARD_HEIGHT, Math.max(MIN_CARD_HEIGHT, targetHeight));
 
     if (!animate) {
